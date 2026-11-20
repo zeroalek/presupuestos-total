@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Presupuestos Total</title>
+<style>
+  :root { color-scheme: light; --bg:#f4f3ef; --paper:#fff; --ink:#192820; --muted:#53655c; --line:#dae2dc; --accent:#185a43; --tint:#eaf3ed; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui,sans-serif; }
+  button,input { font:inherit; }
+  .top { border-bottom:1px solid var(--line); padding:16px max(24px,calc((100% - 1220px)/2)); font-weight:750; }
+  .top span { display:inline-grid; place-items:center; width:32px; height:32px; margin-right:9px; border-radius:9px; color:white; background:var(--accent); }
+  main { max-width:1268px; margin:auto; padding:32px 24px 48px; }
+  h1,h2,p { margin:0; }
+  h1 { font-size:clamp(29px,4vw,40px); letter-spacing:-.045em; }
+  .intro { margin:4px 0 24px; color:var(--muted); }
+  .layout { display:grid; grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr); gap:22px; align-items:start; }
+  .panel,.paper { background:var(--paper); border:1px solid var(--line); border-radius:16px; }
+  .panel { padding:24px; }
+  h2 { font-size:19px; letter-spacing:-.025em; }
+  .fields { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:14px 0 24px; }
+  label { display:grid; gap:5px; font-size:13px; font-weight:650; }
+  label span { color:var(--muted); font-weight:400; }
+  input { min-width:0; width:100%; min-height:42px; border:1px solid #acbbb3; border-radius:8px; background:white; padding:8px 10px; color:var(--ink); }
+  :focus-visible { outline:3px solid #428969; outline-offset:2px; }
+  .row-head,.item { display:grid; grid-template-columns:minmax(0,2fr) minmax(66px,.67fr) minmax(76px,.85fr) 40px; gap:8px; align-items:start; }
+  .row-head { margin:12px 0 5px; color:var(--muted); font-size:12px; font-weight:700; }
+  .item { margin-bottom:8px; }
+  button { border:1px solid transparent; border-radius:8px; min-height:42px; padding:8px 13px; cursor:pointer; font-weight:700; }
+  .remove,.add { background:var(--tint); color:var(--accent); }
+  .remove { padding:0; font-size:20px; }
+  .remove:disabled { opacity:.4; cursor:default; }
+  .actions { margin-top:20px; border-top:1px solid var(--line); padding-top:16px; }
+  .save { background:var(--accent); color:white; }
+  .hint,.error { margin-top:8px; font-size:13px; }
+  .hint { color:var(--muted); }
+  .error { color:#9e2622; }
+  .error:empty { display:none; }
+  .preview { margin:0 0 8px 3px; color:var(--muted); font-size:13px; font-weight:700; }
+  .paper { padding:26px; min-height:365px; }
+  .paper h2 { font-size:29px; margin-bottom:12px; }
+  .meta { margin-bottom:24px; overflow-wrap:anywhere; }
+  .meta p + p { color:var(--muted); }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th,td { padding:9px 5px; border-bottom:1px solid var(--line); text-align:right; }
+  th:first-child,td:first-child { text-align:left; overflow-wrap:anywhere; }
+  td:not(:first-child) { white-space:nowrap; }
+  th { background:var(--tint); }
+  .empty { color:var(--muted); }
+  .total { display:flex; justify-content:space-between; gap:12px; margin-top:16px; padding:12px; background:var(--tint); font-weight:800; }
+  @media(max-width:850px) { .layout { grid-template-columns:1fr; } }
+  @media(max-width:450px) { main { padding-inline:12px; } .panel,.paper { padding:14px; } .fields { grid-template-columns:1fr; } .row-head,.item { gap:5px; } .item input { padding-inline:6px; } }
+  @page { size:A4; margin:16mm; }
+  @media print {
+    body { background:white; color:black; }
+    .top,h1,.intro,.panel,.preview { display:none; }
+    main,.layout,.paper { display:block; margin:0; padding:0; max-width:none; border:0; min-height:0; }
+    .paper h2 { font-size:26pt; }
+    .meta,.total,tr { break-inside:avoid; }
+    thead { display:table-header-group; }
+    th { border-top:1px solid #77847c; }
+    .total { border-top:2px solid #185a43; }
+  }
+</style>
+</head>
+<body>
+<header class="top"><span aria-hidden="true">P</span>Presupuestos Total</header>
+<main>
+  <h1>Nuevo presupuesto</h1>
+  <p class="intro">Añade el cliente y las partidas. El total se calcula al escribir.</p>
+  <div class="layout">
+    <form class="panel" id="editor" novalidate>
+      <h2>Datos del presupuesto</h2>
+      <div class="fields">
+        <label>Cliente<input id="client" maxlength="160" placeholder="Nombre o empresa" required></label>
+        <label>Fecha<input id="date" type="date" required></label>
+        <label>Tu nombre o empresa <span>Opcional</span><input id="issuer" maxlength="160"></label>
+        <label>Referencia <span>Opcional</span><input id="reference" maxlength="60" placeholder="Ej. P-001"></label>
+      </div>
+      <h2>Partidas</h2>
+      <div class="row-head" aria-hidden="true"><div>Descripción</div><div>Cantidad</div><div>Precio (€)</div><div></div></div>
+      <div id="items"></div>
+      <button class="add" type="button" id="add">+ Añadir partida</button>
+      <div class="actions">
+        <button class="save" type="submit">Descargar PDF</button>
+        <p class="error" id="error" role="alert"></p>
+      </div>
+    </form>
+    <section aria-label="Vista previa del presupuesto">
+      <p class="preview">Vista previa</p>
+      <article class="paper">
+        <h2>Presupuesto<span id="out-reference"></span></h2>
+        <div class="meta">
+          <p id="out-issuer" hidden></p>
+          <p>Cliente: <strong id="out-client">—</strong></p>
+          <p id="out-date"></p>
+        </div>
+        <table>
+          <thead><tr><th scope="col">Descripción</th><th scope="col">Cantidad</th><th scope="col">Precio</th><th scope="col">Importe</th></tr></thead>
+          <tbody id="lines"></tbody>
+        </table>
+        <div class="total"><span>Total</span><span id="total">0,00 €</span></div>
+      </article>
+    </section>
+  </div>
+</main>
+<template id="row">
+  <div class="item">
+    <input data-field="description" placeholder="Ej. Diseño web" maxlength="160">
+    <input data-field="quantity" inputmode="decimal" value="1" maxlength="10">
+    <input data-field="price" inputmode="decimal" placeholder="0,00" maxlength="10">
+    <button class="remove" type="button">×</button>
+  </div>
+</template>
+<script>
+  const byId = (id) => document.getElementById(id);
+  const editor = byId('editor');
+  const items = byId('items');
+  const date = byId('date');
+  const euros = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
+  const quantityFormat = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 });
+  const dateFormat = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' });
+  const today = new Date();
+  date.value = [today.getFullYear(), today.getMonth() + 1, today.getDate()]
+    .map((part) => String(part).padStart(2, '0')).join('-');
+
+  function scaledNumber(value) {
+    const match = /^(\d{1,6})(?:[,.](\d{1,2}))?$/.exec(value.trim());
+    if (!match) return null;
+    return Number(match[1]) * 100 + Number((match[2] || '').padEnd(2, '0'));
+  }
+
+  function readRows() {
+    return Array.from(items.children, (row) => {
+      const descriptionInput = row.querySelector('[data-field=description]');
+      const quantityInput = row.querySelector('[data-field=quantity]');
+      const priceInput = row.querySelector('[data-field=price]');
+      const description = descriptionInput.value.trim();
+      const quantity = scaledNumber(quantityInput.value);
+      const price = scaledNumber(priceInput.value);
+      return {
+        descriptionInput, quantityInput, priceInput, description, quantity, price,
+        used: Boolean(description || priceInput.value.trim() || quantityInput.value.trim() !== '1'),
+        complete: Boolean(description && quantity > 0 && price !== null)
+      };
+    });
+  }
+
+  function labelRows() {
+    Array.from(items.children).forEach((row, index, rows) => {
+      const label = 'Partida ' + (index + 1);
+      row.querySelector('[data-field=description]').setAttribute('aria-label', label + ', descripción');
+      row.querySelector('[data-field=quantity]').setAttribute('aria-label', label + ', cantidad');
+      row.querySelector('[data-field=price]').setAttribute('aria-label', label + ', precio en euros');
+      const remove = row.querySelector('.remove');
+      remove.setAttribute('aria-label', 'Eliminar partida ' + (index + 1));
+      remove.disabled = rows.length === 1;
+    });
+  }
+
+  function addRow(focus) {
+    const row = byId('row').content.firstElementChild.cloneNode(true);
+    items.append(row);
+    labelRows();
+    refresh();
+    if (focus) row.querySelector('input').focus();
+  }
+
+  function refresh() {
+    byId('error').textContent = '';
+    byId('out-client').textContent = byId('client').value.trim() || '—';
+    const issuer = byId('issuer').value.trim();
+    byId('out-issuer').textContent = issuer;
+    byId('out-issuer').hidden = !issuer;
+    const reference = byId('reference').value.trim();
+    byId('out-reference').textContent = reference ? ' · ' + reference : '';
+    byId('out-date').textContent = date.value ? dateFormat.format(new Date(date.value + 'T12:00:00')) : '';
+    const lines = byId('lines');
+    lines.replaceChildren();
+    let totalCents = 0;
+    for (const row of readRows().filter((entry) => entry.complete)) {
+      const cents = Math.round(row.quantity * row.price / 100);
+      totalCents += cents;
+      const line = lines.insertRow();
+      for (const value of [row.description, quantityFormat.format(row.quantity / 100), euros.format(row.price / 100), euros.format(cents / 100)]) {
+        line.insertCell().textContent = value;
+      }
+    }
+    if (!lines.rows.length) {
+      const cell = lines.insertRow().insertCell();
+      cell.colSpan = 4;
+      cell.className = 'empty';
+      cell.textContent = 'Las partidas completas aparecerán aquí.';
+    }
+    byId('total').textContent = euros.format(totalCents / 100);
+  }
+
+  function showError(message, input) {
+    byId('error').textContent = message;
+    input.focus();
+  }
+
+  function pdfText(value) {
+    // The standard PDF Helvetica font uses Windows-1252.
+    const extra = '€\0‚ƒ„…†‡ˆ‰Š‹Œ\0Ž\0\0‘’“”•–—˜™š›œ\0žŸ';
+    return Array.from(value.normalize('NFC'), (character) => {
+      const code = character.codePointAt(0);
+      const special = extra.indexOf(character);
+      const byte = code >= 32 && code <= 126 || code >= 160 && code <= 255
+        ? code : special >= 0 && code !== 0 ? 128 + special : 63;
+      return byte.toString(16).padStart(2, '0');
+    }).join('');
+  }
+
+  function wrapText(value, width) {
+    const lines = [];
+    let remaining = value;
+    while (remaining.length > width) {
+      const space = remaining.lastIndexOf(' ', width);
+      const end = space > 0 ? space : width;
+      lines.push(remaining.slice(0, end));
+      remaining = remaining.slice(end).trimStart();
+    }
+    return [...lines, remaining];
+  }
+
+  function buildPdf(rows) {
+    const pages = [];
+    const reference = byId('reference').value.trim();
+    const issuer = byId('issuer').value.trim();
+    let commands;
+    let y;
+
+    function write(value, x, baseline, size = 10, bold = false) {
+      commands.push(`BT /${bold ? 'F2' : 'F1'} ${size} Tf 1 0 0 1 ${x} ${baseline} Tm <${pdfText(value)}> Tj ET\n`);
+    }
+
+    function horizontalRule(baseline) {
+      commands.push(`0.74 0.80 0.76 RG 0.65 w 42 ${baseline} m 553 ${baseline} l S\n`);
+    }
+
+    function startPage() {
+      commands = [];
+      pages.push(commands);
+      write('Presupuesto', 42, 782, 27, true);
+      y = 754;
+      const details = pages.length === 1
+        ? [reference && 'Referencia: ' + reference, issuer, 'Cliente: ' + byId('out-client').textContent, byId('out-date').textContent]
+        : [reference && 'Referencia: ' + reference, 'Página ' + pages.length];
+      for (const detail of details.filter(Boolean)) {
+        for (const line of wrapText(detail, 48)) {
+          write(line, 42, y, 11);
+          y -= 15;
+        }
+      }
+      y -= 18;
+      write('Descripción', 42, y, 10, true);
+      write('Cantidad', 345, y, 10, true);
+      write('Precio', 412, y, 10, true);
+      write('Importe', 484, y, 10, true);
+      horizontalRule(y - 8);
+      y -= 25;
+    }
+
+    startPage();
+    for (const row of rows) {
+      const description = wrapText(row.description, 31);
+      const height = description.length * 14 + 10;
+      if (y - height < 60) startPage();
+      description.forEach((line, index) => write(line, 42, y - index * 14));
+      write(quantityFormat.format(row.quantity / 100), 345, y);
+      write(euros.format(row.price / 100), 412, y);
+      write(euros.format(Math.round(row.quantity * row.price / 100) / 100), 484, y);
+      y -= height;
+      horizontalRule(y + 9);
+    }
+    if (y < 85) startPage();
+    write('Total', 345, y - 10, 13, true);
+    write(byId('total').textContent, 445, y - 10, 13, true);
+
+    // Keep streams ASCII so string lengths are the byte offsets required by PDF.
+    const objects = [
+      '<< /Type /Catalog /Pages 2 0 R >>',
+      `<< /Type /Pages /Count ${pages.length} /Kids [${pages.map((_, index) => (5 + index * 2) + ' 0 R').join(' ')}] >>`,
+      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
+      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>'
+    ];
+    for (const page of pages) {
+      const stream = page.join('');
+      const streamId = objects.length + 2;
+      objects.push(
+        `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${streamId} 0 R >>`,
+        `<< /Length ${stream.length} >>\nstream\n${stream}endstream`
+      );
+    }
+    let pdf = '%PDF-1.4\n';
+    const offsets = [0];
+    objects.forEach((object, index) => {
+      offsets.push(pdf.length);
+      pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+    });
+    const xref = pdf.length;
+    pdf += `xref\n0 ${offsets.length}\n0000000000 65535 f \n`;
+    for (const offset of offsets.slice(1)) pdf += String(offset).padStart(10, '0') + ' 00000 n \n';
+    pdf += `trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+    return new Blob([pdf], { type: 'application/pdf' });
+  }
+
+  function downloadPdf(rows) {
+    const url = URL.createObjectURL(buildPdf(rows));
+    const link = document.createElement('a');
+    const reference = byId('reference').value.trim().replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
+    link.href = url;
+    link.download = 'presupuesto-' + (reference || date.value) + '.pdf';
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
+
+  editor.addEventListener('input', refresh);
+  byId('add').addEventListener('click', () => addRow(true));
+  items.addEventListener('click', (event) => {
+    const button = event.target.closest('.remove');
+    if (!button || button.disabled) return;
+    const row = button.closest('.item');
+    const neighbor = row.nextElementSibling || row.previousElementSibling;
+    row.remove();
+    labelRows();
+    refresh();
+    neighbor.querySelector('input').focus();
+  });
+  editor.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const client = byId('client');
+    if (!client.value.trim()) return showError('Escribe el nombre del cliente.', client);
+    if (!date.value) return showError('Indica la fecha del presupuesto.', date);
+    const rows = readRows();
+    const used = rows.filter((row) => row.used);
+    if (!used.length) return showError('Añade al menos una partida.', rows[0].descriptionInput);
+    for (const row of used) {
+      if (!row.description) return showError('Escribe la descripción de esta partida.', row.descriptionInput);
+      if (!(row.quantity > 0)) return showError('Introduce una cantidad mayor que cero, con hasta dos decimales.', row.quantityInput);
+      if (row.price === null) return showError('Introduce un precio válido, con hasta dos decimales.', row.priceInput);
+    }
+    refresh();
+    downloadPdf(used);
+  });
+  addRow(false);
+</script>
+</body>
+</html>
