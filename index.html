@@ -81,8 +81,8 @@
       <h2>Partidas</h2>
       <div class="row-head" aria-hidden="true"><div>Descripción</div><div>Cantidad</div><div>Precio (€)</div><div></div></div>
       <div id="items"></div>
-      <button class="add" type="button" id="add">+ Añadir partida</button>
-      <div class="actions">
+      <button class="add" type="button" id="add"></button>
+      <div class="actions"><button class="add" type="button" id="load-example">Cargar ejemplo</button>
         <button class="save" type="submit">Descargar PDF</button>
         <p class="error" id="error" role="alert"></p>
       </div>
@@ -348,6 +348,32 @@
     downloadPdf(used);
   });
   addRow(false);
+    byId('load-example').addEventListener('click', () => {
+    const client = byId('client');
+    const hasData = client.value.trim() || readRows().some((row) => row.used);
+
+    if (hasData && !window.confirm('¿Sustituir el cliente y las partidas por el ejemplo?')) {
+      return;
+    }
+
+    client.value = 'Cliente de ejemplo';
+    items.replaceChildren();
+
+    const examples = [
+      { description: 'Diseño de página web', quantity: '1', price: '250' },
+      { description: 'Mantenimiento mensual', quantity: '2', price: '35' }
+    ];
+
+    for (const example of examples) {
+      addRow(false);
+      const row = items.lastElementChild;
+      for (const [field, value] of Object.entries(example)) {
+        row.querySelector('[data-field=' + field + ']').value = value;
+      }
+    }
+
+    refresh();
+  });
 </script>
 </body>
 </html>
