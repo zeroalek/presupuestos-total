@@ -374,6 +374,49 @@
 
     refresh();
   });
+    const draftKey = 'presupuestos-total:borrador';
+  const draftFields = ['client', 'date', 'issuer', 'reference'];
+  const itemFields = ['description', 'quantity', 'price'];
+
+  function saveDraft() {
+    try {
+      const fields = draftFields.map((id) => byId(id).value);
+      const rows = Array.from(items.children, (row) =>
+        itemFields.map((field) => row.querySelector(`[data-field="${field}"]`).value)
+      );
+      localStorage.setItem(draftKey, JSON.stringify({ fields, rows }));
+    } catch (error) {
+      console.warn('No se pudo guardar el borrador.', error);
+    }
+  }
+
+  function restoreDraft() {
+    try {
+      const draft = JSON.parse(localStorage.getItem(draftKey));
+      if (!draft) return;
+
+      draftFields.forEach((id, index) => {
+        byId(id).value = draft.fields[index];
+      });
+
+      items.replaceChildren();
+      for (const values of draft.rows) {
+        addRow(false);
+        itemFields.forEach((field, index) => {
+          items.lastElementChild.querySelector(`[data-field="${field}"]`).value = values[index];
+        });
+      }
+      refresh();
+    } catch (error) {
+      console.warn('No se pudo recuperar el borrador.', error);
+    }
+  }
+
+  restoreDraft();
+  editor.addEventListener('input', saveDraft);
+  editor.addEventListener('click', (event) => {
+    if (event.target.closest('#add, #load-example, .remove')) saveDraft();
+  });
 </script>
 </body>
 </html>
