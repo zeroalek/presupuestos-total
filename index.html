@@ -37,40 +37,57 @@
   .hint { color:var(--muted); }
   .error { color:#9e2622; }
   .error:empty { display:none; }
-  .preview { margin:0 0 8px 3px; color:var(--muted); font-size:13px; font-weight:700; }
-  .paper { padding:26px; min-height:365px; }
-  .paper h2 { font-size:29px; margin-bottom:12px; }
-  .meta { margin-bottom:24px; overflow-wrap:anywhere; }
-  .meta p + p { color:var(--muted); }
-  table { width:100%; border-collapse:collapse; font-size:13px; }
-  th,td { padding:9px 5px; border-bottom:1px solid var(--line); text-align:right; }
-  th:first-child,td:first-child { text-align:left; overflow-wrap:anywhere; }
-  td:not(:first-child) { white-space:nowrap; }
-  th { background:var(--tint); }
-  .empty { color:var(--muted); }
-  .total { display:flex; justify-content:space-between; gap:12px; margin-top:16px; padding:12px; background:var(--tint); font-weight:800; }
-  @media(max-width:850px) { .layout { grid-template-columns:1fr; } }
-  @media(max-width:450px) { main { padding-inline:12px; } .panel,.paper { padding:14px; } .fields { grid-template-columns:1fr; } .row-head,.item { gap:5px; } .item input { padding-inline:6px; } }
-  @page { size:A4; margin:16mm; }
-  @media print {
-    body { background:white; color:black; }
-    .top,h1,.intro,.panel,.preview { display:none; }
-    main,.layout,.paper { display:block; margin:0; padding:0; max-width:none; border:0; min-height:0; }
-    .paper h2 { font-size:26pt; }
-    .meta,.total,tr { break-inside:avoid; }
-    thead { display:table-header-group; }
-    th { border-top:1px solid #77847c; }
-    .total { border-top:2px solid #185a43; }
-  }
+
+  :root { --ink:#192c31; --muted:#52666c; --line:#dbe5e4; --accent:#185951; --tint:#e6f2ee; }
+  body { background:#edf2f2; }
+  .top { background:#142c31; color:#f5fbfa; padding-block:14px; letter-spacing:.02em; }
+  .top span { background:#a7e4c9; color:#183630; }
+  main { max-width:1370px; }
+  .layout { grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr); gap:26px; }
+  .panel { padding:clamp(16px,2.4vw,30px); box-shadow:0 12px 40px #173a3810; }
+  .kicker { font-size:11px; font-weight:800; letter-spacing:.16em; color:var(--accent); margin-bottom:5px; }
+  .styles { border:0; padding:0; margin:0 0 25px; min-width:0; }
+  .styles legend { padding:0; margin-bottom:10px; font-size:19px; font-weight:700; letter-spacing:-.025em; }
+  .choices { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+  .choice { position:relative; cursor:pointer; }
+  .choice input { position:absolute; width:1px; min-height:0; height:1px; opacity:0; padding:0; }
+  .swatch { display:grid; justify-items:center; gap:5px; padding:8px 3px 6px; border:1px solid var(--line); border-radius:9px; color:var(--ink); font-size:11px; }
+  .choice input:checked + .swatch { box-shadow:inset 0 0 0 1px var(--accent); border-color:var(--accent); background:#edf8f4; }
+  .choice input:focus-visible + .swatch { outline:3px solid #428969; outline-offset:2px; }
+  .swatch svg { width:32px; height:41px; }
+  .row-head,.item { grid-template-columns:minmax(0,1fr) minmax(58px,.36fr) minmax(66px,.43fr) 40px; }
+  .actions { display:flex; flex-wrap:wrap; gap:8px; }
+  .actions .error { width:100%; }
+  .studio { position:sticky; top:12px; min-width:0; overflow:hidden; border:1px solid #304850; background:#1b333b; color:#f4faf9; border-radius:16px; box-shadow:0 20px 50px #173a3822; }
+  .studio-bar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:13px 15px; border-bottom:1px solid #ffffff25; }
+  .studio-title { font-weight:750; font-size:14px; }
+  .badge { margin-left:6px; color:#b6edda; font-size:11px; }
+  .badge::before { content:''; display:inline-block; width:6px; height:6px; border-radius:50%; background:#91e6ba; margin-right:5px; vertical-align:2px; }
+  .studio-tools { display:flex; align-items:center; gap:8px; font-size:12px; }
+  .studio-tools button,.studio-tools a { min-height:32px; padding:5px 8px; background:#ffffff0b; border:1px solid #ffffff37; border-radius:6px; color:inherit; font:inherit; text-decoration:none; }
+  .studio-tools a { display:inline-flex; align-items:center; }
+  .studio-tools button:disabled { opacity:.42; cursor:default; }
+  .page-viewport { max-height:72vh; overflow:auto; padding:clamp(10px,2vw,24px); background:#243e46; }
+  .page-sheet { width:min(100%, 665px); margin:auto; aspect-ratio:595 / 842; background:white; box-shadow:0 10px 24px #05161970; }
+  .page-sheet svg { width:100%; height:100%; display:block; }
+  .studio-footer { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 15px; font-size:12px; color:#c8dfdc; }
+  .studio-footer strong { font-size:15px; color:white; white-space:nowrap; }
+  @media(max-width:850px) { .layout { grid-template-columns:1fr; } .studio { position:static; } .page-viewport { max-height:none; } }
+  @media(max-width:450px) { .row-head,.item { grid-template-columns:minmax(0,1fr) 55px 62px 34px; } .swatch { font-size:10px; } }
 </style>
 </head>
 <body>
 <header class="top"><span aria-hidden="true">P</span>Presupuestos Total</header>
 <main>
+  <p class="kicker">ESTUDIO DE PRESUPUESTOS</p>
   <h1>Nuevo presupuesto</h1>
-  <p class="intro">Añade el cliente y las partidas. El total se calcula al escribir.</p>
+  <p class="intro">Elige un diseño, edita tus partidas y revisa cómo quedará el PDF.</p>
   <div class="layout">
     <form class="panel" id="editor" novalidate>
+      <fieldset class="styles">
+        <legend>Diseño del PDF</legend>
+        <div class="choices" id="styles"></div>
+      </fieldset>
       <h2>Datos del presupuesto</h2>
       <div class="fields">
         <label>Cliente<input id="client" maxlength="160" placeholder="Nombre o empresa" required></label>
@@ -87,21 +104,18 @@
         <p class="error" id="error" role="alert"></p>
       </div>
     </form>
-    <section aria-label="Vista previa del presupuesto">
-      <p class="preview">Vista previa</p>
-      <article class="paper">
-        <h2>Presupuesto<span id="out-reference"></span></h2>
-        <div class="meta">
-          <p id="out-issuer" hidden></p>
-          <p>Cliente: <strong id="out-client">—</strong></p>
-          <p id="out-date"></p>
+    <section class="studio" aria-label="Vista previa del presupuesto">
+      <div class="studio-bar">
+        <div><span class="studio-title">Vista previa del PDF</span><span class="badge">En directo</span></div>
+        <div class="studio-tools">
+          <button type="button" id="previous-page" aria-label="Página anterior">←</button>
+          <span id="page-count">1 / 1</span>
+          <button type="button" id="next-page" aria-label="Página siguiente">→</button>
+          <a id="open-pdf" target="_blank" rel="noopener">Abrir PDF ↗</a>
         </div>
-        <table>
-          <thead><tr><th scope="col">Descripción</th><th scope="col">Cantidad</th><th scope="col">Precio</th><th scope="col">Importe</th></tr></thead>
-          <tbody id="lines"></tbody>
-        </table>
-        <div class="total"><span>Total</span><span id="total">0,00 €</span></div>
-      </article>
+      </div>
+      <div class="page-viewport"><div class="page-sheet" id="page-sheet"></div></div>
+      <div class="studio-footer"><span id="preview-summary"></span><strong id="preview-total"></strong></div>
     </section>
   </div>
 </main>
@@ -169,31 +183,7 @@
 
   function refresh() {
     byId('error').textContent = '';
-    byId('out-client').textContent = byId('client').value.trim() || '—';
-    const issuer = byId('issuer').value.trim();
-    byId('out-issuer').textContent = issuer;
-    byId('out-issuer').hidden = !issuer;
-    const reference = byId('reference').value.trim();
-    byId('out-reference').textContent = reference ? ' · ' + reference : '';
-    byId('out-date').textContent = date.value ? dateFormat.format(new Date(date.value + 'T12:00:00')) : '';
-    const lines = byId('lines');
-    lines.replaceChildren();
-    let totalCents = 0;
-    for (const row of readRows().filter((entry) => entry.complete)) {
-      const cents = Math.round(row.quantity * row.price / 100);
-      totalCents += cents;
-      const line = lines.insertRow();
-      for (const value of [row.description, quantityFormat.format(row.quantity / 100), euros.format(row.price / 100), euros.format(cents / 100)]) {
-        line.insertCell().textContent = value;
-      }
-    }
-    if (!lines.rows.length) {
-      const cell = lines.insertRow().insertCell();
-      cell.colSpan = 4;
-      cell.className = 'empty';
-      cell.textContent = 'Las partidas completas aparecerán aquí.';
-    }
-    byId('total').textContent = euros.format(totalCents / 100);
+    queuePreview();
   }
 
   function showError(message, input) {
@@ -213,84 +203,268 @@
     }).join('');
   }
 
-  function wrapText(value, width) {
-    const lines = [];
-    let remaining = value;
-    while (remaining.length > width) {
-      const space = remaining.lastIndexOf(' ', width);
-      const end = space > 0 ? space : width;
-      lines.push(remaining.slice(0, end));
-      remaining = remaining.slice(end).trimStart();
-    }
-    return [...lines, remaining];
+
+  const templates = {
+    atlas: {name:'Atlas', caption:'Corporativo', kind:'band', ink:'#162842', accent:'#245cc5', tint:'#eaf1ff', hero:'#142b52', paper:'#ffffff', muted:'#4d6380', line:'#d8e3f2', serif:false},
+    oliva: {name:'Oliva', caption:'Natural', kind:'rail', ink:'#243c33', accent:'#28624c', tint:'#e9f1e7', hero:'#28624c', paper:'#fdfdf8', muted:'#53675b', line:'#dce7dc', serif:false},
+    editorial: {name:'Editorial', caption:'Elegante', kind:'editorial', ink:'#39282d', accent:'#8b3e50', tint:'#f7e9e9', hero:'#8b3e50', paper:'#fffaf3', muted:'#68545a', line:'#eadbda', serif:true},
+    prisma: {name:'Prisma', caption:'Contemporáneo', kind:'prisma', ink:'#272147', accent:'#603ac6', tint:'#f0eafa', hero:'#44249b', paper:'#ffffff', muted:'#5b5376', line:'#e5dcf3', serif:false}
+  };
+  let styleId = 'atlas';
+  let previewTimer, previewUrl, previewVersion = -1, documentVersion = 0;
+  let pageIndex = 0;
+  let currentPages = [];
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const measure = document.createElement('canvas').getContext('2d');
+
+  function fontFor(font) {
+    return font === 'F3' ? { family:'Times New Roman', weight:400 }
+      : { family:'Arial', weight:font === 'F2' ? 700 : 400 };
   }
 
-  function buildPdf(rows) {
+  function textWidth(value, size, font) {
+    const { family, weight } = fontFor(font);
+    measure.font = weight + ' ' + size + 'px "' + family + '"';
+    return measure.measureText(value).width;
+  }
+
+  function wrapToWidth(value, width, size, font) {
+    let remaining = Array.from(value);
+    const lines = [];
+    while (remaining.length) {
+      let fit = 1;
+      while (fit < remaining.length && textWidth(remaining.slice(0, fit + 1).join(''), size, font) <= width) fit++;
+      if (fit < remaining.length) {
+        const boundary = remaining.slice(0, fit + 1).lastIndexOf(' ');
+        if (boundary > 0) fit = boundary;
+      }
+      lines.push(remaining.slice(0, fit).join(''));
+      remaining = remaining.slice(fit);
+      while (remaining[0] === ' ') remaining.shift();
+    }
+    return lines;
+  }
+
+  function composePages(rows) {
+    const theme = templates[styleId];
     const pages = [];
     const reference = byId('reference').value.trim();
     const issuer = byId('issuer').value.trim();
-    let commands;
-    let y;
+    const client = byId('client').value.trim() || 'Por indicar';
+    const dateLabel = date.value ? dateFormat.format(new Date(date.value + 'T12:00:00')) : 'Por indicar';
+    const titleFont = theme.serif ? 'F3' : 'F2';
+    let page, y, stripe = 0;
 
-    function write(value, x, baseline, size = 10, bold = false) {
-      commands.push(`BT /${bold ? 'F2' : 'F1'} ${size} Tf 1 0 0 1 ${x} ${baseline} Tm <${pdfText(value)}> Tj ET\n`);
+    function rect(x,y,w,h,color) { page.push({type:'rect',x,y,w,h,color}); }
+    function line(x,y,x2,y2,color,width=1) { page.push({type:'line',x,y,x2,y2,color,width}); }
+    function write(value,x,y,size,color,font='F1',right=false) {
+      const width = textWidth(value,size,font);
+      page.push({type:'text',value,x:right ? x-width : x,y,size,color,font,width});
     }
 
-    function horizontalRule(baseline) {
-      commands.push(`0.74 0.80 0.76 RG 0.65 w 42 ${baseline} m 553 ${baseline} l S\n`);
-    }
-
-    function startPage() {
-      commands = [];
-      pages.push(commands);
-      write('Presupuesto', 42, 782, 27, true);
-      y = 754;
-      const details = pages.length === 1
-        ? [reference && 'Referencia: ' + reference, issuer, 'Cliente: ' + byId('out-client').textContent, byId('out-date').textContent]
-        : [reference && 'Referencia: ' + reference, 'Página ' + pages.length];
-      for (const detail of details.filter(Boolean)) {
-        for (const line of wrapText(detail, 48)) {
-          write(line, 42, y, 11);
-          y -= 15;
-        }
+    function startPage(first) {
+      page = [];
+      pages.push(page);
+      rect(0,0,595,842,theme.paper);
+      if (theme.kind === 'band') {
+        rect(0,0,595,149,theme.hero);
+        rect(0,144,595,5,theme.accent);
+        rect(485,0,110,144,'#203d69');
+        line(515,42,555,42,'#9cc0ff',2);
+        line(535,31,535,53,'#9cc0ff',2);
+      } else if (theme.kind === 'rail') {
+        rect(0,0,17,842,theme.hero);
+        rect(31,26,533,109,theme.tint);
+        rect(522,43,20,20,theme.accent);
+        rect(530,51,20,20,'#a4c4a8');
+      } else if (theme.kind === 'editorial') {
+        line(42,30,553,30,theme.accent,2);
+        line(42,128,553,128,theme.accent);
+        write('P',543,104,68,theme.tint,'F3',true);
+      } else {
+        rect(0,0,595,142,theme.hero);
+        rect(441,0,154,93,'#643bc4');
+        rect(489,48,106,94,'#794cd6');
+        rect(552,19,43,41,'#b084ed');
       }
-      y -= 18;
-      write('Descripción', 42, y, 10, true);
-      write('Cantidad', 345, y, 10, true);
-      write('Precio', 412, y, 10, true);
-      write('Importe', 484, y, 10, true);
-      horizontalRule(y - 8);
-      y -= 25;
+      const dark = theme.kind === 'band' || theme.kind === 'prisma';
+      write('PROPUESTA ECONÓMICA',44,63,9,dark ? '#e2e8ff' : theme.accent,'F2');
+      write('Presupuesto',42,113,theme.serif ? 48 : 42,dark ? '#ffffff' : theme.ink,titleFont);
+      y = theme.kind === 'band' ? 174 : 166;
+      if (first) {
+        const blocks = [
+          {x:42,w:234, heading:'CLIENTE', value:client},
+          {x:307,w:246, heading:'EMISOR', value:issuer || 'Por indicar'}
+        ];
+        for (const block of blocks) {
+          write(block.heading,block.x,y+8,8,theme.accent,'F2');
+          const lines = wrapToWidth(block.value,block.w,12,'F2');
+          lines.forEach((value,i) => write(value,block.x,y+28+i*15,12,theme.ink,'F2'));
+          block.height = 28+(lines.length-1)*15;
+        }
+        y += Math.max(...blocks.map(block => block.height)) + 25;
+        line(42,y-10,553,y-10,theme.line);
+        const info = 'Fecha: '+dateLabel+(reference ? '    ·    Ref. '+reference : '');
+        const infoLines = wrapToWidth(info,511,10,'F1');
+        infoLines.forEach((value,i) => write(value,42,y+6+i*14,10,theme.muted));
+        y += 14*infoLines.length+18;
+      } else {
+        const info = reference ? 'Continuación  ·  Ref. '+reference : 'Continuación del presupuesto';
+        write(info,42,y+9,10,theme.muted);
+        y += 25;
+      }
+      rect(42,y,511,29,theme.kind === 'band' ? theme.hero : theme.tint);
+      const headerColor = theme.kind === 'band' ? '#ffffff' : theme.accent;
+      write('DESCRIPCIÓN',53,y+18,8,headerColor,'F2');
+      write('CANT.',344,y+18,8,headerColor,'F2',true);
+      write('PRECIO',432,y+18,8,headerColor,'F2',true);
+      write('IMPORTE',542,y+18,8,headerColor,'F2',true);
+      y += 29;
+      stripe = 0;
     }
 
-    startPage();
+    startPage(true);
+    let total = 0;
+    if (!rows.length) {
+      write('Las partidas completas aparecerán aquí.',53,y+22,10,theme.muted);
+      y += 36;
+    }
     for (const row of rows) {
-      const description = wrapText(row.description, 31);
-      const height = description.length * 14 + 10;
-      if (y - height < 60) startPage();
-      description.forEach((line, index) => write(line, 42, y - index * 14));
-      write(quantityFormat.format(row.quantity / 100), 345, y);
-      write(euros.format(row.price / 100), 412, y);
-      write(euros.format(Math.round(row.quantity * row.price / 100) / 100), 484, y);
-      y -= height;
-      horizontalRule(y + 9);
+      const lines = wrapToWidth(row.description,235,10,'F1');
+      const height = Math.max(33,lines.length*14+15);
+      if (y+height > 750) startPage(false);
+      if (stripe++ % 2 === 0) rect(42,y,511,height,theme.tint);
+      lines.forEach((value,i) => write(value,53,y+20+i*14,10,theme.ink));
+      const cents = Math.round(row.quantity*row.price/100);
+      total += cents;
+      write(quantityFormat.format(row.quantity/100),344,y+20,10,theme.ink,'F1',true);
+      write(euros.format(row.price/100),432,y+20,10,theme.ink,'F1',true);
+      write(euros.format(cents/100),542,y+20,10,theme.ink,'F2',true);
+      y += height;
+      line(42,y,553,y,theme.line,.6);
     }
-    if (y < 85) startPage();
-    write('Total', 345, y - 10, 13, true);
-    write(byId('total').textContent, 445, y - 10, 13, true);
+    if (y+79 > 771) startPage(false);
+    const totalLabel = euros.format(total/100);
+    y += 17;
+    rect(302,y,251,54,theme.hero);
+    write('TOTAL',314,y+33,9,'#ffffff','F2');
+    const totalSize = Math.min(22,Math.floor(22*174/Math.max(174,textWidth(totalLabel,22,titleFont))));
+    write(totalLabel,540,y+34,totalSize,'#ffffff',titleFont,true);
+    pages.forEach((commands,i) => {
+      page = commands;
+      line(42,785,553,785,theme.line);
+      write('PRESUPUESTO',42,807,8,theme.muted,'F2');
+      write((i+1)+' / '+pages.length,553,807,9,theme.muted,'F1',true);
+    });
+    return {pages,totalLabel};
+  }
 
+  function createSvgPage(commands) {
+    function element(tag, attributes) {
+      const node = document.createElementNS(svgNS,tag);
+      for (const [key,value] of Object.entries(attributes)) node.setAttribute(key,value);
+      return node;
+    }
+    const svg = element('svg',{viewBox:'0 0 595 842',role:'img','aria-label':'Página '+(pageIndex+1)+' del presupuesto'});
+    for (const shape of commands) {
+      const {x,y,color} = shape;
+      if (shape.type === 'rect') svg.append(element('rect',{x,y,width:shape.w,height:shape.h,fill:color}));
+      else if (shape.type === 'line') svg.append(element('line',{x1:x,y1:y,x2:shape.x2,y2:shape.y2,stroke:color,'stroke-width':shape.width}));
+      else {
+        const {family,weight} = fontFor(shape.font);
+        const node = element('text',{x,y,fill:color,'font-family':family,'font-weight':weight,'font-size':shape.size,textLength:shape.width,lengthAdjust:'spacingAndGlyphs'});
+        node.textContent = shape.value;
+        svg.append(node);
+      }
+    }
+    return svg;
+  }
+
+  function showPreviewPage() {
+    pageIndex = Math.min(Math.max(pageIndex,0),currentPages.length-1);
+    byId('page-sheet').replaceChildren(createSvgPage(currentPages[pageIndex]));
+    byId('page-count').textContent = (pageIndex+1)+' / '+currentPages.length;
+    byId('previous-page').disabled = pageIndex === 0;
+    byId('next-page').disabled = pageIndex === currentPages.length-1;
+  }
+
+  function queuePreview() {
+    documentVersion++;
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(updatePreview,70);
+  }
+
+  function updatePreview() {
+    if (previewVersion === documentVersion) return;
+    const rows = readRows().filter(row => row.complete);
+    const {pages,totalLabel} = composePages(rows);
+    currentPages = pages;
+    previewVersion = documentVersion;
+    showPreviewPage();
+    byId('preview-total').textContent = totalLabel;
+    byId('preview-summary').textContent = templates[styleId].name+' · A4 · '+rows.length+(rows.length === 1 ? ' partida' : ' partidas');
+  }
+
+  function rgb(color) {
+    return color.slice(1).match(/../g).map(channel => (parseInt(channel,16)/255).toFixed(4)).join(' ');
+  }
+
+  function pdfCommand(shape) {
+    const {x,y,color} = shape;
+    const c = rgb(color);
+    if (shape.type === 'rect') return c+' rg '+x+' '+(842-y-shape.h)+' '+shape.w+' '+shape.h+' re f\n';
+    if (shape.type === 'line') return c+' RG '+shape.width+' w '+x+' '+(842-y)+' m '+shape.x2+' '+(842-shape.y2)+' l S\n';
+    return c+' rg BT /'+shape.font+' '+shape.size+' Tf 1 0 0 1 '+Number(x.toFixed(2))+' '+(842-y)+' Tm <'+pdfText(shape.value)+'> Tj ET\n';
+  }
+
+  function initStudio() {
+    const styles = byId('styles');
+    for (const [id,theme] of Object.entries(templates)) {
+      const label = document.createElement('label');
+      label.className = 'choice';
+      label.innerHTML = '<input type="radio" name="pdf-style" value="'+id+'"><span class="swatch"><svg viewBox="0 0 30 39" aria-hidden="true"><rect x="1" y="1" width="28" height="37" rx="2" fill="'+theme.paper+'" stroke="'+theme.line+'"/><rect x="4" y="4" width="22" height="9" rx="1" fill="'+theme.hero+'"/><path d="M5 19h20M5 23h17M5 27h20" stroke="'+theme.line+'" stroke-width="1.5"/><rect x="14" y="31" width="11" height="3" rx="1" fill="'+theme.accent+'"/></svg>'+theme.name+'</span>';
+      const radio = label.firstElementChild;
+      radio.title = theme.caption;
+      radio.checked = id === styleId;
+      styles.append(label);
+    }
+    styles.addEventListener('change',event => {
+      if (!Object.hasOwn(templates,event.target.value)) return;
+      styleId = event.target.value;
+      pageIndex = 0;
+      saveDraft();
+      queuePreview();
+    });
+    byId('previous-page').addEventListener('click',() => { pageIndex--; showPreviewPage(); });
+    byId('next-page').addEventListener('click',() => { pageIndex++; showPreviewPage(); });
+    const opener = byId('open-pdf');
+    opener.href = '#';
+    opener.addEventListener('click',() => {
+      updatePreview();
+      if (previewUrl) {
+        const previous = previewUrl;
+        setTimeout(() => URL.revokeObjectURL(previous),30000);
+      }
+      previewUrl = URL.createObjectURL(buildPdf(currentPages));
+      opener.href = previewUrl;
+    });
+    updatePreview();
+  }
+
+  function buildPdf(pages) {
     // Keep streams ASCII so string lengths are the byte offsets required by PDF.
     const objects = [
       '<< /Type /Catalog /Pages 2 0 R >>',
-      `<< /Type /Pages /Count ${pages.length} /Kids [${pages.map((_, index) => (5 + index * 2) + ' 0 R').join(' ')}] >>`,
+      `<< /Type /Pages /Count ${pages.length} /Kids [${pages.map((_, index) => (6 + index * 2) + ' 0 R').join(' ')}] >>`,
       '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
-      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>'
+      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>',
+      '<< /Type /Font /Subtype /Type1 /BaseFont /Times-Roman /Encoding /WinAnsiEncoding >>'
     ];
     for (const page of pages) {
-      const stream = page.join('');
+      const stream = page.map(pdfCommand).join('');
       const streamId = objects.length + 2;
       objects.push(
-        `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${streamId} 0 R >>`,
+        `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents ${streamId} 0 R >>`,
         `<< /Length ${stream.length} >>\nstream\n${stream}endstream`
       );
     }
@@ -307,8 +481,9 @@
     return new Blob([pdf], { type: 'application/pdf' });
   }
 
-  function downloadPdf(rows) {
-    const url = URL.createObjectURL(buildPdf(rows));
+  function downloadPdf() {
+    updatePreview();
+    const url = URL.createObjectURL(buildPdf(currentPages));
     const link = document.createElement('a');
     const reference = byId('reference').value.trim().replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
     link.href = url;
@@ -345,10 +520,10 @@
       if (row.price === null) return showError('Introduce un precio válido, con hasta dos decimales.', row.priceInput);
     }
     refresh();
-    downloadPdf(used);
+    downloadPdf();
   });
   addRow(false);
-    byId('load-example').addEventListener('click', () => {
+  byId('load-example').addEventListener('click', () => {
     const client = byId('client');
     const hasData = client.value.trim() || readRows().some((row) => row.used);
 
@@ -374,7 +549,7 @@
 
     refresh();
   });
-    const draftKey = 'presupuestos-total:borrador';
+  const draftKey = 'presupuestos-total:borrador';
   const draftFields = ['client', 'date', 'issuer', 'reference'];
   const itemFields = ['description', 'quantity', 'price'];
 
@@ -384,7 +559,7 @@
       const rows = Array.from(items.children, (row) =>
         itemFields.map((field) => row.querySelector(`[data-field="${field}"]`).value)
       );
-      localStorage.setItem(draftKey, JSON.stringify({ fields, rows }));
+      localStorage.setItem(draftKey, JSON.stringify({ fields, rows, styleId }));
     } catch (error) {
       console.warn('No se pudo guardar el borrador.', error);
     }
@@ -393,7 +568,8 @@
   function restoreDraft() {
     try {
       const draft = JSON.parse(localStorage.getItem(draftKey));
-      if (!draft) return;
+      if (!draft || !Array.isArray(draft.fields) || !Array.isArray(draft.rows) || !draft.rows.length) return;
+      if (Object.hasOwn(templates,draft.styleId)) styleId = draft.styleId;
 
       draftFields.forEach((id, index) => {
         byId(id).value = draft.fields[index];
@@ -413,6 +589,7 @@
   }
 
   restoreDraft();
+  initStudio();
   editor.addEventListener('input', saveDraft);
   editor.addEventListener('click', (event) => {
     if (event.target.closest('#add, #load-example, .remove')) saveDraft();
